@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"time"
 )
 
 func main() {
@@ -22,25 +23,37 @@ func main() {
 			log.Fatalf("[Server] Error: %v", err)
 		}
 
-		go func(c net.Conn) {
-			defer c.Close()
-			fmt.Printf("[Server] Accepted connection from %v\n", c.RemoteAddr())
+		go handleConnection(conn)
+	}
+}
 
-			buf := make([]byte, 1024)
+func handleConnection(c net.Conn) {
+	defer c.Close()
+	fmt.Printf("[Server] Accepted connection from %v\n", c.RemoteAddr())
 
-			for {
-				n, err := c.Read(buf)
-				if err != nil {
-					if err == io.EOF {
-						fmt.Printf("[Server] Client %v disconnected\n", c.RemoteAddr())
-						break
-					}
-					log.Printf("[Server] Error: %v", err)
-					break
-				}
+	buf := make([]byte, 1024)
 
-				fmt.Printf("[Server] From client %v: %v\n", c.RemoteAddr(), string(buf[:n]))
+	for {
+		err := c.SetReadDeadline(time.Now().Add(5 * time.Second))
+		if err != nil {
+			log.Printf("[Server] Error: %v", err)
+			break
+		}
+
+		n, err := c.Read(buf)
+		if err != nil {
+			if err == io.EOF {
+				fmt.Printf("[Server] Client %v disconnected\n", c.RemoteAddr())
+				break
 			}
-		}(conn)
+			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+				fmt.Printf("[Server] Read timeout from %v\n", c.RemoteAddr())
+				break
+			}
+			log.Printf("[Server] Error: %v", err)
+			break
+		}
+
+		fmt.Printf("[Server] From client %v: %v\n", c.RemoteAddr(), string(buf[:n]))
 	}
 }
