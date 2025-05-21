@@ -105,7 +105,7 @@ func Serve() {
 		fmt.Println("0. Exit")
 		fmt.Print(">> ")
 		var choice int
-		fmt.Scan(&choice)
+		fmt.Scanln(&choice)
 		if choice == 1 {
 			checkFriends()
 		} else if choice == 2 {

@@ -14,7 +14,7 @@ func main() {
 		fmt.Println("0. Exit")
 		fmt.Print(">> ")
 		var choice int
-		fmt.Scan(&choice)
+		fmt.Scanln(&choice)
 		if choice == 0 {
 			break
 		} else if choice == 1 {
