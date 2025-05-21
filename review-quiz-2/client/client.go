@@ -30,12 +30,12 @@ func checkFriends() {
 	body, err := io.ReadAll(resp.Body)
 	handler.HandleError(err)
 
-	fmt.Println("Response from server:", string(body))
+	fmt.Println("Message from server: ", string(body))
 }
 
 func sendMessage() {
 	var name string
-	var msg string
+	var message string
 
 	reader := bufio.NewReader(os.Stdin)
 
@@ -43,6 +43,7 @@ func sendMessage() {
 		fmt.Print("Enter your name: ")
 		name, _ = reader.ReadString('\n')
 		name = strings.TrimSpace(name)
+
 		re := regexp.MustCompile(`^[a-zA-Z]+$`)
 		if re.MatchString(name) {
 			break
@@ -51,10 +52,10 @@ func sendMessage() {
 
 	for {
 		fmt.Print("Enter your message: ")
-		msg, _ = reader.ReadString('\n')
-		msg = strings.TrimSpace(msg)
+		message, _ = reader.ReadString('\n')
+		message = strings.TrimSpace(message)
 
-		if len(msg) >= 9 {
+		if len(message) >= 9 {
 			break
 		}
 	}
@@ -66,14 +67,14 @@ func sendMessage() {
 	handler.HandleError(err)
 
 	defer file.Close()
-	
-	_, err = file.WriteString(msg)
+
+	_, err = file.WriteString(message)
 	handler.HandleError(err)
 
-	part, err := w.CreateFormFile("file", name+".txt")
+	formField, err := w.CreateFormFile("file", name+".txt")
 	handler.HandleError(err)
 
-	_, err = io.Copy(part, file)
+	_, err = io.Copy(formField, file)
 	handler.HandleError(err)
 
 	w.Close()
@@ -94,24 +95,24 @@ func sendMessage() {
 	body, err := io.ReadAll(resp.Body)
 	handler.HandleError(err)
 
-	fmt.Println("Response from server:", string(body))
+	fmt.Println("Message from server: ", string(body))
 }
 
-func Serve() {
+func Run() {
 	for {
+		var choice int
 		fmt.Println("Welcome to VK.com")
-		fmt.Println("1. Check friends")
-		fmt.Println("2. Send a message")
+		fmt.Println("1. Check Friends")
+		fmt.Println("2. Send a Message")
 		fmt.Println("0. Exit")
 		fmt.Print(">> ")
-		var choice int
 		fmt.Scanln(&choice)
-		if choice == 1 {
+		if choice == 0 {
+			break
+		} else if choice == 1 {
 			checkFriends()
 		} else if choice == 2 {
 			sendMessage()
-		} else if choice == 0 {
-			break
 		}
 	}
 }
